@@ -3,14 +3,10 @@ package user
 import (
 	"context"
 	"go-flashcard/server/util"
-	"strconv"
+	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
-)
-
-const (
-	secretKey = "secret"
 )
 
 type service struct {
@@ -46,7 +42,7 @@ func (s *service) CreateUser(c context.Context, req *CreateUserReq) (*CreateUser
 	}
 
 	res := &CreateUserRes{
-		ID:       strconv.Itoa(int(r.ID)),
+		ID:       u.ID,
 		Username: r.Username,
 		Email:    r.Email,
 	}
@@ -75,18 +71,18 @@ func (s *service) Login(c context.Context, req *LoginUserReq) (*LoginUserRes, er
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, MyJWTClaims{
-		ID:       strconv.Itoa(int(u.ID)),
+		ID:       u.ID,
 		Username: u.Username,
 		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer:    strconv.Itoa(int(u.ID)),
+			Issuer:    u.ID,
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)), // กำหนดอายุโทเค็น 24 ชั่วโมง
 		},
 	})
 
-	ss, err := token.SignedString([]byte(secretKey))
+	ss, err := token.SignedString([]byte(os.Getenv("secretKey")))
 	if err != nil {
 		return &LoginUserRes{}, err
 	}
 
-	return &LoginUserRes{accessToken: ss, Username: u.Username, ID: strconv.Itoa(int(u.ID))}, nil
+	return &LoginUserRes{accessToken: ss, Username: u.Username, ID: u.ID}, nil
 }

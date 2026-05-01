@@ -21,8 +21,8 @@ func NewRepository(db DBTX) Repository {
 }
 
 func (r *repository) CreateUser(ctx context.Context, user *User) (*User, error) {
-	var lastInsertId int
-	query := "INSERT INTO users(username, password, email) VALUES ($1, $2, $3) returning id"
+	var lastInsertId string
+	query := "INSERT INTO users(username, password_hash, email) VALUES ($1, $2, $3) returning id"
 
 	err := r.db.QueryRowContext(ctx, query, user.Username, user.Password, user.Email).Scan(&lastInsertId)
 
@@ -30,13 +30,13 @@ func (r *repository) CreateUser(ctx context.Context, user *User) (*User, error) 
 		return &User{}, err
 	}
 
-	user.ID = int64(lastInsertId)
+	user.ID = lastInsertId
 	return user, nil
 }
 
 func (r *repository) GetUserByEmail(ctx context.Context, email string) (*User, error) {
 	u := User{}
-	query := "SELECT id, email, username, password FROM users WHERE email = $1"
+	query := "SELECT id, email, username, password_hash FROM users WHERE email = $1"
 	err := r.db.QueryRowContext(ctx, query, email).Scan(&u.ID, &u.Email, &u.Username, &u.Password)
 	if err != nil {
 		return &User{}, nil
