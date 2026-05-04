@@ -1,6 +1,8 @@
 package deck
 
 import (
+	"errors"
+	"go-flashcard/server/util"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -17,7 +19,11 @@ func NewHandler(s Service) *Handler {
 }
 
 func (h *Handler) CreateDeck(c *gin.Context) {
-	userID := c.MustGet("userID").(string)
+	userID, err := util.GetUserIDFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
 	var req CreateDeckReq
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -37,8 +43,18 @@ func (h *Handler) CreateDeck(c *gin.Context) {
 func (h *Handler) GetDeckByID(c *gin.Context) {
 	deckID := c.Param("id")
 
-	deck, err := h.Service.GetDeckWithCards(c.Request.Context(), deckID)
+	userID, err := util.GetUserIDFromContext(c)
 	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	deck, err := h.Service.GetDeckWithCards(c.Request.Context(), deckID, userID)
+	if err != nil {
+		if errors.Is(err, ErrUnauthorized) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "forbidden: you cannot access this private deck"})
+			return
+		}
 		c.JSON(http.StatusNotFound, gin.H{"error": "deck not found"})
 		return
 	}
@@ -47,7 +63,11 @@ func (h *Handler) GetDeckByID(c *gin.Context) {
 }
 
 func (h *Handler) GetDecksByUserID(c *gin.Context) {
-	userID := c.MustGet("userID").(string)
+	userID, err := util.GetUserIDFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
 	decks, err := h.Service.GetDecksByUserID(c.Request.Context(), userID)
 	if err != nil {
@@ -60,7 +80,11 @@ func (h *Handler) GetDecksByUserID(c *gin.Context) {
 
 func (h *Handler) UpdateDeck(c *gin.Context) {
 	deckID := c.Param("id")
-	userID := c.MustGet("userID").(string)
+	userID, err := util.GetUserIDFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
 	var req CreateDeckReq
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -70,8 +94,8 @@ func (h *Handler) UpdateDeck(c *gin.Context) {
 
 	deck, err := h.Service.UpdateDeck(c.Request.Context(), deckID, userID, &req)
 	if err != nil {
-		if err.Error() == "unauthorized" {
-			c.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
+		if errors.Is(err, ErrUnauthorized) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "forbidden: you are not the owner"})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -83,12 +107,16 @@ func (h *Handler) UpdateDeck(c *gin.Context) {
 
 func (h *Handler) DeleteDeck(c *gin.Context) {
 	deckID := c.Param("id")
-	userID := c.MustGet("userID").(string)
-
-	err := h.Service.DeleteDeck(c.Request.Context(), deckID, userID)
+	userID, err := util.GetUserIDFromContext(c) // 🌟 เปลี่ยนตรงนี้
 	if err != nil {
-		if err.Error() == "unauthorized" {
-			c.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = h.Service.DeleteDeck(c.Request.Context(), deckID, userID)
+	if err != nil {
+		if errors.Is(err, ErrUnauthorized) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "forbidden: you are not the owner"})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

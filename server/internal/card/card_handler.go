@@ -1,6 +1,8 @@
 package card
 
 import (
+	"errors"
+	"go-flashcard/server/util"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -16,7 +18,11 @@ func NewHandler(s Service) *Handler {
 
 func (h *Handler) CreateCard(c *gin.Context) {
 	deckID := c.Param("id")
-	userID := c.MustGet("userID").(string)
+	userID, err := util.GetUserIDFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
 	var req CreateCardReq
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -26,12 +32,12 @@ func (h *Handler) CreateCard(c *gin.Context) {
 
 	card, err := h.Service.CreateCard(c.Request.Context(), deckID, userID, &req)
 	if err != nil {
-		if err.Error() == "unauthorized" {
+		if errors.Is(err, ErrUnauthorized) {
 			c.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
 			return
 		}
-		if err.Error() == "deck not found" {
-			c.JSON(http.StatusNotFound, gin.H{"error": "deck not found"})
+		if errors.Is(err, ErrCardNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "ceck not found"})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -43,7 +49,11 @@ func (h *Handler) CreateCard(c *gin.Context) {
 
 func (h *Handler) UpdateCard(c *gin.Context) {
 	cardID := c.Param("id")
-	userID := c.MustGet("userID").(string)
+	userID, err := util.GetUserIDFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
 	var req UpdateCardReq
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -53,12 +63,12 @@ func (h *Handler) UpdateCard(c *gin.Context) {
 
 	card, err := h.Service.UpdateCard(c.Request.Context(), cardID, userID, &req)
 	if err != nil {
-		if err.Error() == "unauthorized" {
+		if errors.Is(err, ErrUnauthorized) {
 			c.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
 			return
 		}
-		if err.Error() == "card not found" {
-			c.JSON(http.StatusNotFound, gin.H{"error": "card not found"})
+		if errors.Is(err, ErrCardNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "ceck not found"})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -70,16 +80,20 @@ func (h *Handler) UpdateCard(c *gin.Context) {
 
 func (h *Handler) DeleteCard(c *gin.Context) {
 	cardID := c.Param("id")
-	userID := c.MustGet("userID").(string)
-
-	err := h.Service.DeleteCard(c.Request.Context(), cardID, userID)
+	userID, err := util.GetUserIDFromContext(c)
 	if err != nil {
-		if err.Error() == "unauthorized" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = h.Service.DeleteCard(c.Request.Context(), cardID, userID)
+	if err != nil {
+		if errors.Is(err, ErrUnauthorized) {
 			c.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
 			return
 		}
-		if err.Error() == "card not found" {
-			c.JSON(http.StatusNotFound, gin.H{"error": "card not found"})
+		if errors.Is(err, ErrCardNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "ceck not found"})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

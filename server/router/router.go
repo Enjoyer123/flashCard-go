@@ -5,6 +5,7 @@ import (
 	"go-flashcard/server/internal/deck"
 	"go-flashcard/server/internal/health"
 	"go-flashcard/server/internal/user"
+	"go-flashcard/server/middleware"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,15 +20,18 @@ func NewRouter(h *health.Handler, u *user.Handler, d *deck.Handler, c *card.Hand
 	r.POST("/auth/logout", u.Logout)
 	r.POST("/auth/signup", u.CreateUser)
 
-	r.POST("/decks", d.CreateDeck)
-	r.GET("/decks/:id", d.GetDeckByID)
-	r.GET("/decks", d.GetDecksByUserID)
-	r.PUT("/decks/:id", d.UpdateDeck)
-	r.DELETE("/decks/:id", d.DeleteDeck)
-
-	r.POST("/decks/:id/cards", c.CreateCard)
-	r.PATCH("/cards/:id", c.UpdateCard)
-	r.DELETE("/cards/:id", c.DeleteCard)
+	protected := r.Group("/")
+	protected.Use(middleware.RequireAuth())
+	{
+		protected.POST("/decks", d.CreateDeck)
+		protected.GET("/decks/:id", d.GetDeckByID)
+		protected.GET("/decks", d.GetDecksByUserID)
+		protected.PUT("/decks/:id", d.UpdateDeck)
+		protected.DELETE("/decks/:id", d.DeleteDeck)
+		protected.POST("/decks/:id/cards", c.CreateCard)
+		protected.PATCH("/cards/:id", c.UpdateCard)
+		protected.DELETE("/cards/:id", c.DeleteCard)
+	}
 
 }
 

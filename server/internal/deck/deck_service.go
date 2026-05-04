@@ -91,10 +91,15 @@ func (s *service) DeleteDeck(c context.Context, deckID string, userID string) er
 	return s.Repository.DeleteDeck(c, deckID, userID)
 }
 
-func (s *service) GetDeckWithCards(c context.Context, deckID string) (*Deck, error) {
+func (s *service) GetDeckWithCards(c context.Context, deckID string, userID string) (*Deck, error) {
 	deck, err := s.Repository.GetDeckWithCards(c, deckID)
 	if err != nil {
 		return nil, err
 	}
+
+	if deck.UserID != userID && !deck.IsPublic {
+		return nil, ErrUnauthorized
+	}
+
 	return deck, nil
 }

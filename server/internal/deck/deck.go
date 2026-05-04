@@ -41,8 +41,7 @@ type Service interface {
 	GetDecksByUserID(c context.Context, userID string) ([]*Deck, error)
 	UpdateDeck(c context.Context, deckID string, userID string, req *CreateDeckReq) (*Deck, error)
 	DeleteDeck(c context.Context, deckID string, userID string) error
-	GetDeckWithCards(c context.Context, deckID string) (*Deck, error) // ← เพิ่ม
-
+	GetDeckWithCards(c context.Context, deckID string, userID string) (*Deck, error)
 }
 
 type Repository interface {

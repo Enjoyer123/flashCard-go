@@ -5,6 +5,11 @@ import (
 	"errors"
 )
 
+var (
+	ErrUnauthorized = errors.New("unauthorized")
+	ErrCardNotFound = errors.New("card not found")
+)
+
 type service struct {
 	Repository
 }
@@ -16,11 +21,11 @@ func NewService(r Repository) Service {
 func (s *service) CreateCard(ctx context.Context, deckID string, userID string, req *CreateCardReq) (*Card, error) {
 	ownerID, err := s.Repository.GetDeckByID(ctx, deckID)
 	if err != nil {
-		return nil, errors.New("deck not found")
+		return nil, ErrCardNotFound
 	}
 
 	if ownerID != userID {
-		return nil, errors.New("unauthorized")
+		return nil, ErrUnauthorized
 	}
 
 	card := &Card{
@@ -35,7 +40,7 @@ func (s *service) CreateCard(ctx context.Context, deckID string, userID string, 
 func (s *service) UpdateCard(ctx context.Context, cardID string, userID string, req *UpdateCardReq) (*Card, error) {
 	card, err := s.Repository.GetCardByID(ctx, cardID)
 	if err != nil {
-		return nil, errors.New("card not found")
+		return nil, ErrCardNotFound
 	}
 
 	ownerID, err := s.Repository.GetDeckByID(ctx, card.DeckID)
@@ -44,7 +49,7 @@ func (s *service) UpdateCard(ctx context.Context, cardID string, userID string, 
 	}
 
 	if ownerID != userID {
-		return nil, errors.New("unauthorized")
+		return nil, ErrUnauthorized
 	}
 
 	if req.Front != "" {
@@ -60,7 +65,7 @@ func (s *service) UpdateCard(ctx context.Context, cardID string, userID string, 
 func (s *service) DeleteCard(ctx context.Context, cardID string, userID string) error {
 	card, err := s.Repository.GetCardByID(ctx, cardID)
 	if err != nil {
-		return errors.New("card not found")
+		return ErrCardNotFound
 	}
 
 	ownerID, err := s.Repository.GetDeckByID(ctx, card.DeckID)
@@ -69,7 +74,7 @@ func (s *service) DeleteCard(ctx context.Context, cardID string, userID string) 
 	}
 
 	if ownerID != userID {
-		return errors.New("unauthorized")
+		return ErrCardNotFound
 	}
 
 	return s.Repository.DeleteCard(ctx, cardID)
