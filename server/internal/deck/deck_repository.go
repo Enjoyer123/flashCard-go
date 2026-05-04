@@ -3,6 +3,9 @@ package deck
 import (
 	"context"
 	"database/sql"
+	"time"
+
+	"github.com/google/uuid"
 )
 
 type DBTX interface {
@@ -10,6 +13,7 @@ type DBTX interface {
 	PrepareContext(context.Context, string) (*sql.Stmt, error)
 	QueryContext(context.Context, string, ...interface{}) (*sql.Rows, error)
 	QueryRowContext(context.Context, string, ...interface{}) *sql.Row
+	BeginTx(ctx context.Context, opts *sql.TxOptions) (*sql.Tx, error)
 }
 
 type repository struct {
@@ -107,4 +111,102 @@ func (r *repository) GetDeckWithCards(ctx context.Context, deckID string) (*Deck
 	}
 
 	return deck, nil
+}
+
+func (r *repository) ForkDeck(ctx context.Context, deck *Deck, cards []CardSummary, userID string) (*Deck, error) {
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
+
+	newDeck := &Deck{}
+	err = tx.QueryRowContext(ctx,
+		`INSERT INTO decks (user_id, title, description, is_public)
+		 VALUES ($1, $2, $3, false)
+		 RETURNING id, user_id, title, description, is_public, created_at`,
+		userID, deck.Title, deck.Description,
+	).Scan(&newDeck.ID, &newDeck.UserID, &newDeck.Title, &newDeck.Description, &newDeck.IsPublic, &newDeck.CreatedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	now := time.Now()
+	for _, c := range cards {
+		_, err := tx.ExecContext(ctx,
+			`INSERT INTO cards (id, deck_id, front, back, due, stability, difficulty, elapsed_days, scheduled_days, reps, lapses, state, created_at)
+			 VALUES ($1, $2, $3, $4, $5, 0, 0, 0, 0, 0, 0, 0, $6)`,
+			uuid.New().String(), newDeck.ID, c.Front, c.Back, now, now,
+		)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+
+	return newDeck, nil
+}
+
+func (r *repository) GetPublicDecks(ctx context.Context, search string, offset int, limit int) ([]*Deck, error) {
+	query := `
+		SELECT id, user_id, title, description, is_public, created_at
+		FROM decks
+		WHERE is_public = true AND (title ILIKE $1 OR description ILIKE $1)
+		ORDER BY created_at DESC
+		LIMIT $2 OFFSET $3`
+
+	rows, err := r.db.QueryContext(ctx, query, "%"+search+"%", limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	decks := []*Deck{}
+	for rows.Next() {
+		d := &Deck{}
+		if err := rows.Scan(&d.ID, &d.UserID, &d.Title, &d.Description, &d.IsPublic, &d.CreatedAt); err != nil {
+			return nil, err
+		}
+		decks = append(decks, d)
+	}
+	return decks, nil
+}
+
+func (r *repository) CountPublicDecks(ctx context.Context, search string) (int, error) {
+	var total int
+	err := r.db.QueryRowContext(ctx,
+		`SELECT COUNT(*) FROM decks WHERE is_public = true AND (title ILIKE $1 OR description ILIKE $1)`,
+		"%"+search+"%",
+	).Scan(&total)
+	return total, err
+}
+
+func (r *repository) GetDeckStats(ctx context.Context, deckID string) (*DeckStats, error) {
+	stats := &DeckStats{}
+
+	query := `
+		SELECT
+			COUNT(*)                                            AS total_cards,
+			COUNT(*) FILTER (WHERE due <= NOW())               AS due_today,
+			COUNT(*) FILTER (WHERE state = 0)                  AS new_cards,
+			COUNT(*) FILTER (WHERE state = 1)                  AS learning_cards,
+			COUNT(*) FILTER (WHERE state = 2)                  AS review_cards
+		FROM cards
+		WHERE deck_id = $1`
+
+	err := r.db.QueryRowContext(ctx, query, deckID).Scan(
+		&stats.TotalCards,
+		&stats.DueToday,
+		&stats.NewCards,
+		&stats.LearningCards,
+		&stats.ReviewCards,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return stats, nil
 }

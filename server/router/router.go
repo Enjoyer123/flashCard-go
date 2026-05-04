@@ -20,17 +20,26 @@ func NewRouter(h *health.Handler, u *user.Handler, d *deck.Handler, c *card.Hand
 	r.POST("/auth/logout", u.Logout)
 	r.POST("/auth/signup", u.CreateUser)
 
+	r.GET("/decks/public", d.GetPublicDecks)
+
 	protected := r.Group("/")
 	protected.Use(middleware.RequireAuth())
 	{
 		protected.POST("/decks", d.CreateDeck)
 		protected.GET("/decks/:id", d.GetDeckByID)
 		protected.GET("/decks", d.GetDecksByUserID)
-		protected.PUT("/decks/:id", d.UpdateDeck)
+		protected.PATCH("/decks/:id", d.UpdateDeck)
 		protected.DELETE("/decks/:id", d.DeleteDeck)
 		protected.POST("/decks/:id/cards", c.CreateCard)
+		protected.POST("/decks/:id/fork", d.ForkDeck)
+		protected.GET("/decks/:id/review", c.GetDueCards)
+		protected.GET("/decks/:id/stats", d.GetDeckStats)
+
 		protected.PATCH("/cards/:id", c.UpdateCard)
 		protected.DELETE("/cards/:id", c.DeleteCard)
+		protected.POST("/cards/:id/review", c.ReviewCard)
+		protected.POST("/cards/auto", c.AutoCard)
+
 	}
 
 }
