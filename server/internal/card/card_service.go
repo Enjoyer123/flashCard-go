@@ -206,14 +206,7 @@ func (s *service) AutoCard(ctx context.Context, userID string, req *AutoCardReq)
 		return nil, errors.New("word not found in dictionary")
 	}
 
-	var result []struct {
-		Meanings []struct {
-			PartOfSpeech string `json:"partOfSpeech"`
-			Definitions  []struct {
-				Definition string `json:"definition"`
-			} `json:"definitions"`
-		} `json:"meanings"`
-	}
+	var result []DictionaryWord
 
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return nil, errors.New("failed to parse dictionary response")

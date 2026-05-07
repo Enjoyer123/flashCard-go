@@ -36,6 +36,19 @@ type CardReview struct {
 	ReviewedAt    time.Time `json:"reviewed_at"`
 }
 
+type DictionaryWord struct {
+	Meanings []Meaning `json:"meanings"`
+}
+
+type Meaning struct {
+	PartOfSpeech string       `json:"partOfSpeech"`
+	Definitions  []Definition `json:"definitions"`
+}
+
+type Definition struct {
+	Definition string `json:"definition"`
+}
+
 type AutoCardReq struct {
 	Word   string `json:"word" binding:"required"`
 	DeckID string `json:"deck_id" binding:"required"`
