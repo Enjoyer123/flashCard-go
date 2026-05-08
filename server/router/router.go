@@ -6,7 +6,9 @@ import (
 	"go-flashcard/server/internal/health"
 	"go-flashcard/server/internal/user"
 	"go-flashcard/server/middleware"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,10 +17,19 @@ var r *gin.Engine
 func NewRouter(h *health.Handler, u *user.Handler, d *deck.Handler, c *card.Handler) {
 	r = gin.Default()
 
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:5173", "http://127.0.0.1:5173"}, // อนุญาตให้พอร์ต 5173 ของ Vite เข้าถึงได้
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
+
 	r.GET("/ping", h.Ping)
 	r.POST("/auth/login", u.Login)
 	r.POST("/auth/logout", u.Logout)
-	r.POST("/auth/signup", u.CreateUser)
+	r.POST("/auth/register", u.CreateUser)
 
 	r.GET("/decks/public", d.GetPublicDecks)
 
