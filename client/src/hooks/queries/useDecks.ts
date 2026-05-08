@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getDecksFn, createDeckFn } from '../../api/deckApi';
-import type { Deck, CreateDeckReq } from '../../types/deck';
+import { getDecksFn, createDeckFn, getDeckByIdFn, getDeckStatsFn } from '../../api/deckApi';
+import type { Deck, CreateDeckReq, DeckStats } from '../../types/deck';
 import { AxiosError } from 'axios';
 
 
@@ -18,8 +18,23 @@ export const useCreateDeck = () => {
   return useMutation<Deck, AxiosError, CreateDeckReq>({
     mutationFn: createDeckFn,
     onSuccess: () => {
-      // เมื่อสร้างเสร็จ สั่งให้ TanStack ล้างแคชเก่า แล้วดึงข้อมูลใหม่ทันที
       queryClient.invalidateQueries({ queryKey: ['decks'] });
     },
+  });
+};
+
+export const useDeck = (deckId: string) => {
+  return useQuery<Deck, AxiosError>({
+    queryKey: ['decks', deckId],
+    queryFn: () => getDeckByIdFn(deckId),
+    enabled: !!deckId, 
+  });
+};
+
+export const useDeckStats = (deckId: string) => {
+  return useQuery<DeckStats, AxiosError>({
+    queryKey: ['decks', deckId, 'stats'],
+    queryFn: () => getDeckStatsFn(deckId),
+    enabled: !!deckId,
   });
 };

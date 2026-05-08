@@ -18,3 +18,11 @@ export interface CreateDeckReq {
   title: string;
   description: string;
 }
+
+export interface DeckStats {
+  total_cards: number;
+  due_today: number;
+  new_cards: number;
+  learning_cards: number;
+  review_cards: number;
+}
