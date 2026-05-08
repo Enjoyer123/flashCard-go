@@ -57,7 +57,7 @@ func (s *service) GetDecksByUserID(c context.Context, userID string) ([]*Deck, e
 	}
 	return decks, nil
 }
-func (s *service) UpdateDeck(c context.Context, deckID string, userID string, req *CreateDeckReq) (*Deck, error) {
+func (s *service) UpdateDeck(c context.Context, deckID string, userID string, req *UpdateDeckReq) (*Deck, error) {
 	deck, err := s.Repository.GetDeckByID(c, deckID)
 	if err != nil {
 		return nil, err
@@ -69,6 +69,7 @@ func (s *service) UpdateDeck(c context.Context, deckID string, userID string, re
 
 	deck.Title = req.Title
 	deck.Description = req.Description
+	deck.IsPublic = req.IsPublic
 
 	updated, err := s.Repository.UpdateDeck(c, deck)
 	if err != nil {

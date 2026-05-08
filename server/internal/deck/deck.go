@@ -52,6 +52,12 @@ type CreateDeckReq struct {
 	Description string `json:"description"`
 }
 
+type UpdateDeckReq struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	IsPublic    bool   `json:"is_public"`
+}
+
 type CreateDeckRes struct {
 	ID          string `json:"id"`
 	UserID      string `json:"user_id"`
@@ -65,7 +71,7 @@ type Service interface {
 	CreateDeck(c context.Context, userID string, req *CreateDeckReq) (*CreateDeckRes, error)
 	GetDeckByID(c context.Context, deckID string) (*Deck, error)
 	GetDecksByUserID(c context.Context, userID string) ([]*Deck, error)
-	UpdateDeck(c context.Context, deckID string, userID string, req *CreateDeckReq) (*Deck, error)
+	UpdateDeck(c context.Context, deckID string, userID string, req *UpdateDeckReq) (*Deck, error)
 	DeleteDeck(c context.Context, deckID string, userID string) error
 	GetDeckWithCards(c context.Context, deckID string, userID string) (*Deck, error)
 	ForkDeck(c context.Context, deckID string, userID string) (*ForkDeckRes, error)

@@ -21,10 +21,23 @@ export interface CreateDeckReq {
   description: string;
 }
 
+export interface UpdateDeckReq {
+  title: string;
+  description: string;
+  is_public: boolean;
+}
+
 export interface DeckStats {
   total_cards: number;
   due_today: number;
   new_cards: number;
   learning_cards: number;
   review_cards: number;
+}
+
+export interface PublicDeckRes {
+  data: Deck[];
+  page: number;
+  limit: number;
+  total: number;
 }

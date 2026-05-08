@@ -87,7 +87,7 @@ func (h *Handler) UpdateDeck(c *gin.Context) {
 		return
 	}
 
-	var req CreateDeckReq
+	var req UpdateDeckReq
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useDeck, useDeckStats } from '../../hooks/queries/useDecks';
+import { useDeck, useDeckStats, useUpdateDeck } from '../../hooks/queries/useDecks';
 import { useCreateCard } from '../../hooks/queries/useCards';
 
 export default function DeckDetail() {
@@ -9,6 +9,7 @@ export default function DeckDetail() {
   const { data: deck, isLoading: isDeckLoading } = useDeck(deckId || '');
   const { data: stats, isLoading: isStatsLoading } = useDeckStats(deckId || '');
   const { mutate: createCard, isPending: isCreating } = useCreateCard();
+  const { mutate: updateDeck, isPending: isUpdating } = useUpdateDeck();
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [front, setFront] = useState('');
@@ -23,6 +24,18 @@ export default function DeckDetail() {
         setIsAddModalOpen(false);
         setFront('');
         setBack('');
+      }
+    });
+  };
+
+  const handleTogglePublic = () => {
+    if (!deck) return;
+    updateDeck({
+      deckId: deck.id,
+      data: {
+        title: deck.title,
+        description: deck.description,
+        is_public: !deck.is_public
       }
     });
   };
@@ -74,16 +87,31 @@ export default function DeckDetail() {
           <p className="text-neutral-400 mt-2 text-sm">{deck.description || 'No description provided'}</p>
         </div>
         
-        <Link 
-          to={`/study/${deck.id}`}
-          className={`px-6 py-3 rounded-xl text-sm font-bold transition-all active:scale-95 text-center flex-shrink-0
-            ${stats?.due_today 
-              ? 'bg-blue-600 text-white hover:bg-blue-500 shadow-[0_0_20px_-5px_rgba(37,99,235,0.5)]' 
-              : 'bg-white text-black hover:bg-neutral-200'
-            }`}
-        >
-          {stats?.due_today ? `Study Now (${stats.due_today} due)` : 'Study Anyway'}
-        </Link>
+        <div className="flex gap-3 mt-4 sm:mt-0">
+          <button 
+            onClick={handleTogglePublic}
+            disabled={isUpdating}
+            className={`px-4 py-3 rounded-xl text-sm font-bold transition-all border flex-shrink-0 flex items-center justify-center
+              ${deck.is_public 
+                ? 'bg-neutral-900 border-green-500/50 text-green-400 hover:bg-neutral-800' 
+                : 'bg-neutral-900 border-neutral-700 text-neutral-400 hover:bg-neutral-800'
+              }`}
+            title={deck.is_public ? 'Make Private' : 'Make Public'}
+          >
+            {deck.is_public ? 'Public' : 'Private'}
+          </button>
+          
+          <Link 
+            to={`/study/${deck.id}`}
+            className={`px-6 py-3 rounded-xl text-sm font-bold transition-all active:scale-95 text-center flex-shrink-0
+              ${stats?.due_today 
+                ? 'bg-blue-600 text-white hover:bg-blue-500 shadow-[0_0_20px_-5px_rgba(37,99,235,0.5)]' 
+                : 'bg-white text-black hover:bg-neutral-200'
+              }`}
+          >
+            {stats?.due_today ? `Study Now (${stats.due_today} due)` : 'Study Anyway'}
+          </Link>
+        </div>
       </div>
 
       {/* Stats Grid (FSRS Metrics) */}

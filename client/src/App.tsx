@@ -6,8 +6,8 @@ import MainLayout from './layouts/MainLayout';
 import Dashboard from './pages/dashboard/Dashboard';
 import DeckDetail from './pages/decks/DeckDetail';
 import StudyMode from './pages/study/StudyMode';
-const Explore = () => <div className="p-8 text-white text-center mt-20 text-xl font-bold">Explore Public Decks</div>;
-const ExploreDetail = () => <div className="p-8 text-white text-center mt-20 text-xl font-bold">Explore Deck Detail</div>;
+import Explore from './pages/explore/Explore';
+import ExploreDetail from './pages/explore/ExploreDetail';
 
 export default function App() {
   return (
