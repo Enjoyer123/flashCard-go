@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { useAuthStore } from '../store/useAuthStore';
 
 // สร้าง instance ของ axios
@@ -13,7 +13,7 @@ const apiClient = axios.create({
 // Response Interceptor
 apiClient.interceptors.response.use(
   (response) => response,
-  (error) => {
+  (error: AxiosError) => {
     // จัดการกรณี 401 Unauthorized (Token หมดอายุ หรือไม่มีสิทธิ์)
     if (error.response && error.response.status === 401) {
       console.error("Unauthorized: Session expired or invalid token.");

@@ -1,22 +1,24 @@
-import { useState } from 'react';
-import { useLogin } from '../../hooks/queries/useAuth';
+import React, { useState } from 'react';
+import { useRegister } from '../../hooks/queries/useAuth';
 import { useNavigate } from 'react-router-dom'
 
-export default function Login() {
+export default function Register() {
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate()
 
-  const { mutate: login, isPending, error } = useLogin();
+  const { mutate: register, isPending, error } = useRegister();
 
-  const handleLogin = (e) => {
+  const handleRegister = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    login(
-      { email, password },
+    register(
+      { username, email, password },
       {
         onSuccess: () => {
-          navigate('/dashboard')
+          alert('Registration successful! Please login.');
+          navigate('/login')
         }
       }
     );
@@ -28,17 +30,30 @@ export default function Login() {
 
       <div className="relative z-10 w-full max-w-md p-8 bg-black/40 backdrop-blur-md border border-neutral-800 rounded-2xl shadow-2xl">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold tracking-tight mb-2">Welcome back</h1>
-          <p className="text-neutral-400 text-sm">Enter your email to sign in to your account</p>
+          <h1 className="text-3xl font-bold tracking-tight mb-2">Create an account</h1>
+          <p className="text-neutral-400 text-sm">Enter your details to get started</p>
         </div>
 
         {error && (
           <div className="mb-6 p-4 rounded-lg bg-red-950/50 border border-red-900 text-red-400 text-sm">
-            {error.response?.data?.error || error.message || 'Login failed'}
+            {error.response?.data?.error || error.message || 'Registration failed'}
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="space-y-5">
+        <form onSubmit={handleRegister} className="space-y-5">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-neutral-300" htmlFor="username">Username</label>
+            <input
+              id="username"
+              type="text"
+              placeholder="johndoe"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-xl text-white placeholder:text-neutral-600 focus:outline-none focus:ring-1 focus:ring-white focus:border-white transition-all duration-200"
+              required
+            />
+          </div>
+
           <div className="space-y-2">
             <label className="text-sm font-medium text-neutral-300" htmlFor="email">Email Address</label>
             <input
@@ -53,9 +68,7 @@ export default function Login() {
           </div>
 
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-neutral-300" htmlFor="password">Password</label>
-            </div>
+            <label className="text-sm font-medium text-neutral-300" htmlFor="password">Password</label>
             <input
               id="password"
               type="password"
@@ -72,14 +85,14 @@ export default function Login() {
             disabled={isPending}
             className="w-full py-3 px-4 mt-2 bg-white text-black font-semibold rounded-xl hover:bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black focus:ring-white transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center"
           >
-            {isPending ? 'Signing in...' : 'Sign In'}
+            {isPending ? 'Creating account...' : 'Sign Up'}
           </button>
         </form>
 
         <div className="mt-8 text-center text-sm text-neutral-500">
-          Don't have an account?{' '}
-          <a href="/register" className="text-white font-medium hover:underline underline-offset-4">
-            Sign up
+          Already have an account?{' '}
+          <a href="/login" className="text-white font-medium hover:underline underline-offset-4">
+            Sign in
           </a>
         </div>
       </div>

@@ -1,7 +1,16 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export const useAuthStore = create(
+import type { User } from '../types/user';
+
+interface AuthState {
+  user: User | null;
+  isAuthenticated: boolean;
+  login: (user: User) => void;
+  logout: () => void;
+}
+
+export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
