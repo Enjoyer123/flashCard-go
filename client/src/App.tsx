@@ -3,8 +3,8 @@ import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import ProtectedRoute from './components/ProtectedRoute';
 import MainLayout from './layouts/MainLayout';
+import Dashboard from './pages/dashboard/Dashboard';
 
-const Dashboard = () => <div className="p-8 text-white text-center mt-20 text-xl font-bold">Dashboard</div>;
 const DeckDetail = () => <div className="p-8 text-white text-center mt-20 text-xl font-bold">Deck Detail</div>;
 const StudyMode = () => <div className="p-8 text-white text-center mt-20 text-xl font-bold">Study Mode</div>;
 const Explore = () => <div className="p-8 text-white text-center mt-20 text-xl font-bold">Explore Public Decks</div>;

@@ -11,15 +11,17 @@ import (
 
 func RequireAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		authHeader := c.GetHeader("Authorization")
+		tokenString, err := c.Cookie("jwt")
 
-		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: Missing or invalid token"})
-			c.Abort()
-			return
+		if err != nil || tokenString == "" {
+			authHeader := c.GetHeader("Authorization")
+			if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: Missing or invalid token"})
+				c.Abort()
+				return
+			}
+			tokenString = strings.TrimPrefix(authHeader, "Bearer ")
 		}
-
-		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 
 		claims, err := util.VerifyToken(tokenString)
 		if err != nil {
