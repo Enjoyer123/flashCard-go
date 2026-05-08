@@ -16,9 +16,11 @@ type Deck struct {
 }
 
 type CardSummary struct {
-	ID    string `json:"id"`
-	Front string `json:"front"`
-	Back  string `json:"back"`
+	ID    string     `json:"id"`
+	Front string     `json:"front"`
+	Back  string     `json:"back"`
+	Due   *time.Time `json:"due"`
+	State int16      `json:"state"`
 }
 
 type ForkDeckRes struct {

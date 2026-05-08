@@ -1,4 +1,5 @@
 import apiClient from './client';
+import type { Card, ReviewCardReq } from '../types/card';
 
 export interface CreateCardReq {
   front: string;
@@ -7,5 +8,15 @@ export interface CreateCardReq {
 
 export const createCardFn = async (deckId: string, data: CreateCardReq) => {
   const response = await apiClient.post(`/decks/${deckId}/cards`, data);
+  return response.data;
+};
+
+export const getDueCardsFn = async (deckId: string): Promise<Card[]> => {
+  const response = await apiClient.get<Card[]>(`/decks/${deckId}/review`);
+  return response.data;
+};
+
+export const reviewCardFn = async (cardId: string, data: ReviewCardReq): Promise<Card> => {
+  const response = await apiClient.post<Card>(`/cards/${cardId}/review`, data);
   return response.data;
 };

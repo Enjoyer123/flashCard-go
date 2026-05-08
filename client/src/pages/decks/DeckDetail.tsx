@@ -27,6 +27,24 @@ export default function DeckDetail() {
     });
   };
 
+  const formatDue = (due?: string | null, state?: number) => {
+    if (state === 0) return <span className="text-blue-400 font-semibold">New Card</span>;
+    if (!due) return <span className="text-neutral-500">Unknown</span>;
+    
+    const dueDate = new Date(due);
+    const now = new Date();
+    
+    const diffTime = Math.max(0, dueDate.getTime() - now.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const diffMinutes = Math.ceil(diffTime / (1000 * 60));
+
+    if (diffMinutes <= 0) return <span className="text-orange-400 font-semibold">Due now</span>;
+    if (diffMinutes < 60) return <span className="text-orange-400">In {diffMinutes} mins</span>;
+    if (diffDays <= 1) return <span className="text-green-400">Tomorrow</span>;
+    
+    return <span className="text-neutral-400">In {diffDays} days</span>;
+  };
+
   if (isDeckLoading || isStatsLoading) {
     return (
       <div className="animate-pulse space-y-6">
@@ -119,6 +137,11 @@ export default function DeckDetail() {
                 <div className="flex-1">
                   <div className="text-[10px] text-neutral-600 font-bold uppercase tracking-wider mb-2">Back</div>
                   <div className="text-base text-neutral-300">{card.back}</div>
+                </div>
+                <div className="hidden sm:block w-px bg-neutral-800 group-hover:bg-neutral-700 transition-colors"></div>
+                <div className="flex-1">
+                  <div className="text-[10px] text-neutral-600 font-bold uppercase tracking-wider mb-2">Next Review</div>
+                  <div className="text-sm mt-1">{formatDue(card.due, card.state)}</div>
                 </div>
               </div>
             ))}

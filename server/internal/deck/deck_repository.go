@@ -95,7 +95,7 @@ func (r *repository) GetDeckWithCards(ctx context.Context, deckID string) (*Deck
 		return nil, err
 	}
 
-	query := `SELECT id, front, back FROM cards WHERE deck_id = $1 ORDER BY created_at`
+	query := `SELECT id, front, back, due, state FROM cards WHERE deck_id = $1 ORDER BY created_at`
 	rows, err := r.db.QueryContext(ctx, query, deckID)
 	if err != nil {
 		return nil, err
@@ -104,7 +104,7 @@ func (r *repository) GetDeckWithCards(ctx context.Context, deckID string) (*Deck
 
 	for rows.Next() {
 		c := CardSummary{}
-		if err := rows.Scan(&c.ID, &c.Front, &c.Back); err != nil {
+		if err := rows.Scan(&c.ID, &c.Front, &c.Back, &c.Due, &c.State); err != nil {
 			return nil, err
 		}
 		deck.Cards = append(deck.Cards, c)

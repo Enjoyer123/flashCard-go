@@ -2,6 +2,8 @@ export interface CardSummary {
   id: string;
   front: string;
   back: string;
+  due?: string | null;
+  state?: number;
 }
 
 export interface Deck {

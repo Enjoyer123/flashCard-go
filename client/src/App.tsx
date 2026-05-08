@@ -5,8 +5,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import MainLayout from './layouts/MainLayout';
 import Dashboard from './pages/dashboard/Dashboard';
 import DeckDetail from './pages/decks/DeckDetail';
-
-const StudyMode = () => <div className="p-8 text-white text-center mt-20 text-xl font-bold">Study Mode</div>;
+import StudyMode from './pages/study/StudyMode';
 const Explore = () => <div className="p-8 text-white text-center mt-20 text-xl font-bold">Explore Public Decks</div>;
 const ExploreDetail = () => <div className="p-8 text-white text-center mt-20 text-xl font-bold">Explore Deck Detail</div>;
 
