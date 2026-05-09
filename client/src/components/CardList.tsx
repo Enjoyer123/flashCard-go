@@ -3,10 +3,11 @@ import type { CardSummary } from '../types/deck';
 interface CardListProps {
   cards: CardSummary[] | null | undefined;
   onAddClick?: () => void;
+  onEditClick?: (card: CardSummary) => void;
   previewMode?: boolean;
 }
 
-export default function CardList({ cards, onAddClick, previewMode = false }: CardListProps) {
+export default function CardList({ cards, onAddClick, onEditClick, previewMode = false }: CardListProps) {
   const formatDue = (due?: string | null, state?: number) => {
     if (state === 0) return <span className="text-blue-400 font-semibold">New Card</span>;
     if (!due) return <span className="text-neutral-500">Unknown</span>;
@@ -69,9 +70,20 @@ export default function CardList({ cards, onAddClick, previewMode = false }: Car
               {!previewMode && (
                 <>
                   <div className="hidden sm:block w-px bg-neutral-800 group-hover:bg-neutral-700 transition-colors"></div>
-                  <div className="flex-1">
-                    <div className="text-[10px] text-neutral-600 font-bold uppercase tracking-wider mb-2">Next Review</div>
-                    <div className="text-sm mt-1">{formatDue(card.due, card.state)}</div>
+                  <div className="flex-1 flex justify-between items-center">
+                    <div>
+                      <div className="text-[10px] text-neutral-600 font-bold uppercase tracking-wider mb-2">Next Review</div>
+                      <div className="text-sm mt-1">{formatDue(card.due, card.state)}</div>
+                    </div>
+                    {onEditClick && (
+                      <button 
+                        onClick={() => onEditClick(card)}
+                        className="opacity-0 group-hover:opacity-100 p-2 text-neutral-500 hover:text-white transition-all bg-neutral-900 hover:bg-neutral-800 rounded-lg"
+                        title="Edit Card"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                      </button>
+                    )}
                   </div>
                 </>
               )}

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createCardFn, getDueCardsFn, reviewCardFn } from '../../api/cardApi';
-import type { CreateCardReq } from '../../api/cardApi';
+import { createCardFn, getDueCardsFn, reviewCardFn, autoCardFn, updateCardFn } from '../../api/cardApi';
+import type { CreateCardReq, AutoCardReq, UpdateCardReq } from '../../api/cardApi';
 import type { Card, ReviewCardReq } from '../../types/card';
 import { AxiosError } from 'axios';
 
@@ -27,5 +27,23 @@ export const useDueCards = (deckId: string) => {
 export const useReviewCard = () => {
   return useMutation<Card, AxiosError, { cardId: string; data: ReviewCardReq }>({
     mutationFn: ({ cardId, data }) => reviewCardFn(cardId, data),
+  });
+};
+
+export const useAutoCard = () => {
+  return useMutation<Card, AxiosError, AutoCardReq>({
+    mutationFn: (data) => autoCardFn(data),
+  });
+};
+
+export const useUpdateCard = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<Card, AxiosError, { cardId: string; deckId: string; data: UpdateCardReq }>({
+    mutationFn: ({ cardId, data }) => updateCardFn(cardId, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['decks', variables.deckId] });
+      queryClient.invalidateQueries({ queryKey: ['decks', variables.deckId, 'due-cards'] });
+    },
   });
 };

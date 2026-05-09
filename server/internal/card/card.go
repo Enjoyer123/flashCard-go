@@ -36,17 +36,23 @@ type CardReview struct {
 	ReviewedAt    time.Time `json:"reviewed_at"`
 }
 
-type DictionaryWord struct {
-	Meanings []Meaning `json:"meanings"`
+type JishoResponse struct {
+	Data []JishoData `json:"data"`
 }
 
-type Meaning struct {
-	PartOfSpeech string       `json:"partOfSpeech"`
-	Definitions  []Definition `json:"definitions"`
+type JishoData struct {
+	Japanese []JishoJapanese `json:"japanese"`
+	Senses   []JishoSense    `json:"senses"`
 }
 
-type Definition struct {
-	Definition string `json:"definition"`
+type JishoJapanese struct {
+	Word    string `json:"word"`
+	Reading string `json:"reading"`
+}
+
+type JishoSense struct {
+	EnglishDefinitions []string `json:"english_definitions"`
+	PartsOfSpeech      []string `json:"parts_of_speech"`
 }
 
 type AutoCardReq struct {

@@ -1,70 +1,39 @@
 import React, { useState, useEffect } from 'react';
-import type { Card } from '../../../types/card';
+import type { CardSummary } from '../../../types/deck';
 
-interface AddCardModalProps {
+interface EditCardModalProps {
+  card: CardSummary | null;
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (front: string, back: string) => void;
-  onAutoAdd?: (word: string) => Promise<Card | null>;
-  isCreating: boolean;
+  onEdit: (cardId: string, front: string, back: string) => void;
+  isUpdating: boolean;
 }
 
-export default function AddCardModal({ isOpen, onClose, onAdd, onAutoAdd, isCreating }: AddCardModalProps) {
+export default function EditCardModal({ card, isOpen, onClose, onEdit, isUpdating }: EditCardModalProps) {
   const [front, setFront] = useState('');
   const [back, setBack] = useState('');
-  const [isFetching, setIsFetching] = useState(false);
 
   useEffect(() => {
-    if (isOpen) {
-      setFront('');
-      setBack('');
-    }
-  }, [isOpen]);
-
-  if (!isOpen) return null;
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    onAdd(front, back);
-  };
-
-  const handleAutoGenerate = async () => {
-    if (!front.trim() || !onAutoAdd) return;
-    
-    setIsFetching(true);
-    const card = await onAutoAdd(front.trim());
-    setIsFetching(false);
-    
-    if (card) {
+    if (card && isOpen) {
       setFront(card.front);
       setBack(card.back);
     }
+  }, [card, isOpen]);
+
+  if (!isOpen || !card) return null;
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    onEdit(card.id, front, back);
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-neutral-950 border border-neutral-800 rounded-3xl p-6 w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200">
-        <h2 className="text-xl font-bold mb-6 text-white">Add New Card</h2>
+        <h2 className="text-xl font-bold mb-6 text-white">Edit Card</h2>
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <div className="flex justify-between items-end mb-2">
-              <label className="block text-sm font-medium text-neutral-300">Front (Question/Word)</label>
-              {onAutoAdd && (
-                <button 
-                  type="button" 
-                  onClick={handleAutoGenerate}
-                  disabled={isFetching || !front.trim()}
-                  className="text-xs flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors border border-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed"
-                  title="Fetch translation from Jisho"
-                >
-                  {isFetching ? (
-                    <span className="w-3 h-3 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>
-                  ) : (
-                    <span>Auto Translate</span>
-                  )}
-                </button>
-              )}
-            </div>
+            <label className="block text-sm font-medium text-neutral-300 mb-2">Front (Question/Word)</label>
             <textarea 
               value={front}
               onChange={(e) => setFront(e.target.value)}
@@ -94,10 +63,10 @@ export default function AddCardModal({ isOpen, onClose, onAdd, onAutoAdd, isCrea
             </button>
             <button 
               type="submit" 
-              disabled={isCreating}
+              disabled={isUpdating}
               className="bg-white text-black px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-neutral-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isCreating ? 'Adding...' : 'Add Card'}
+              {isUpdating ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
         </form>

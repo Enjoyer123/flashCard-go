@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
+	"strings"
 	"time"
 
 	"github.com/open-spaced-repetition/go-fsrs"
@@ -188,9 +190,9 @@ func (s *service) AutoCard(ctx context.Context, userID string, req *AutoCardReq)
 		return nil, ErrUnauthorized
 	}
 
-	// Dictionary API
-	url := "https://api.dictionaryapi.dev/api/v2/entries/en/" + req.Word
-	reqAPI, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	// Jisho API
+	apiUrl := "https://jisho.org/api/v1/search/words?keyword=" + url.QueryEscape(req.Word)
+	reqAPI, err := http.NewRequestWithContext(ctx, "GET", apiUrl, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -198,30 +200,53 @@ func (s *service) AutoCard(ctx context.Context, userID string, req *AutoCardReq)
 	client := &http.Client{Timeout: 10 * time.Second}
 	resp, err := client.Do(reqAPI)
 	if err != nil {
-		return nil, errors.New("dictionary api unreachable")
+		return nil, errors.New("jisho api unreachable")
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode == http.StatusNotFound {
-		return nil, errors.New("word not found in dictionary")
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New("word not found or api error")
 	}
 
-	var result []DictionaryWord
+	var result JishoResponse
 
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return nil, errors.New("failed to parse dictionary response")
+		return nil, errors.New("failed to parse jisho response")
 	}
 
-	if len(result) == 0 || len(result[0].Meanings) == 0 || len(result[0].Meanings[0].Definitions) == 0 {
+	if len(result.Data) == 0 {
 		return nil, errors.New("could not find definitions for this word")
 	}
 
-	meaning := result[0].Meanings[0]
-	front := req.Word
-	back := fmt.Sprintf("(%s) %s", meaning.PartOfSpeech, meaning.Definitions[0].Definition)
+	wordData := result.Data[0]
 
-	return s.CreateCard(ctx, req.DeckID, userID, &CreateCardReq{
+	front := req.Word
+	reading := ""
+	if len(wordData.Japanese) > 0 {
+		jap := wordData.Japanese[0]
+		if jap.Word != "" {
+			front = jap.Word
+		}
+		if jap.Reading != "" {
+			reading = fmt.Sprintf("[%s] ", jap.Reading)
+		}
+	}
+
+	back := ""
+	if len(wordData.Senses) > 0 {
+		sense := wordData.Senses[0]
+		defs := strings.Join(sense.EnglishDefinitions, ", ")
+		pos := ""
+		if len(sense.PartsOfSpeech) > 0 {
+			pos = fmt.Sprintf("(%s) ", strings.Join(sense.PartsOfSpeech, ", "))
+		}
+		back = reading + pos + defs
+	} else {
+		return nil, errors.New("could not find definitions for this word")
+	}
+
+	return &Card{
 		Front: front,
 		Back:  back,
-	})
+	}, nil
 }
