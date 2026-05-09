@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { usePublicDecks } from '../../hooks/queries/useDecks';
+import DeckCard from '../../components/DeckCard';
 
 export default function Explore() {
   const [search, setSearch] = useState('');
@@ -41,19 +41,14 @@ export default function Explore() {
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {data?.data.map((deck) => (
-            <Link 
-              key={deck.id} 
-              to={`/explore/${deck.id}`}
-              className="group bg-neutral-950/50 border border-neutral-800 p-6 rounded-2xl hover:border-neutral-600 transition-all hover:bg-neutral-900/50 flex flex-col h-full"
-            >
-              <div className="flex-1">
-                <h3 className="text-lg font-bold text-white mb-2 group-hover:text-blue-400 transition-colors line-clamp-1">{deck.title}</h3>
-                <p className="text-sm text-neutral-400 mb-4 line-clamp-2">{deck.description || 'No description provided.'}</p>
-              </div>
-              <div className="flex items-center text-xs text-blue-500 font-bold uppercase tracking-wider mt-4">
-                <span>View Details & Clone →</span>
-              </div>
-            </Link>
+            <DeckCard 
+              key={deck.id}
+              id={deck.id}
+              title={deck.title}
+              description={deck.description}
+              linkTo={`/explore/${deck.id}`}
+              variant="explore"
+            />
           ))}
         </div>
       )}

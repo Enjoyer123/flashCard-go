@@ -1,5 +1,6 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useDeck, useForkDeck } from '../../hooks/queries/useDecks';
+import CardList from '../../components/CardList';
 
 export default function ExploreDetail() {
   const { deckId } = useParams<{ deckId: string }>();
@@ -56,39 +57,7 @@ export default function ExploreDetail() {
         </div>
       </div>
 
-      <div className="pt-4">
-        <h2 className="text-xl font-bold text-white mb-6">Preview Cards</h2>
-        {(!deck.cards || deck.cards.length === 0) ? (
-          <div className="text-neutral-500 italic text-center py-10 bg-neutral-950/30 rounded-2xl border border-dashed border-neutral-800">
-            This deck is empty.
-          </div>
-        ) : (
-          <div className="grid gap-3">
-            {deck.cards.slice(0, 10).map((card, idx) => (
-              <div key={idx} className="p-5 bg-neutral-950/50 border border-neutral-800/80 rounded-2xl flex flex-col sm:flex-row gap-4 hover:border-neutral-700 transition-colors">
-                <div className="flex-1">
-                  <div className="text-[10px] text-neutral-600 font-bold uppercase tracking-wider mb-2">Front</div>
-                  <div className="text-base text-white">{card.front}</div>
-                </div>
-                <div className="hidden sm:block w-px bg-neutral-800/50"></div>
-                <div className="flex-1">
-                  <div className="text-[10px] text-neutral-600 font-bold uppercase tracking-wider mb-2">Back</div>
-                  <div className="text-base text-neutral-400">{card.back}</div>
-                </div>
-              </div>
-            ))}
-            
-            {deck.cards.length > 10 && (
-              <div className="text-center py-6">
-                <div className="inline-block px-4 py-2 rounded-full bg-neutral-900 border border-neutral-800 text-xs font-bold text-neutral-400 uppercase tracking-wider">
-                  + {deck.cards.length - 10} more cards hidden
-                </div>
-                <p className="text-neutral-500 text-sm mt-3">Clone this deck to view and study all cards.</p>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+      <CardList cards={deck.cards} previewMode={true} />
     </div>
   );
 }
