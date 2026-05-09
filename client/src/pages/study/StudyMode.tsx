@@ -67,7 +67,7 @@ export default function StudyMode() {
       <StudyProgress 
         deckId={deckId || ''} 
         currentIndex={currentIndex} 
-        totalCards={cards.length} 
+        cards={cards} 
       />
 
       <Flashcard 

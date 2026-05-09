@@ -16,7 +16,7 @@ export default function DeckDetail() {
   const { data: deck, isLoading: isDeckLoading } = useDeck(deckId || '');
   const { data: stats, isLoading: isStatsLoading } = useDeckStats(deckId || '');
   const { mutate: createCard, isPending: isCreating } = useCreateCard();
-  const { mutateAsync: autoCardAsync, isPending: isAutoCreating } = useAutoCard();
+  const { mutateAsync: autoCardAsync } = useAutoCard();
   const { mutate: updateCard, isPending: isCardUpdating } = useUpdateCard();
   const { mutate: updateDeck, isPending: isUpdating } = useUpdateDeck();
 
