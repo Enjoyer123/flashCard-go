@@ -51,6 +51,7 @@ func NewRouter(h *health.Handler, u *user.Handler, d *deck.Handler, c *card.Hand
 		protected.POST("/cards/:id/review", c.ReviewCard)
 		protected.POST("/cards/auto", c.AutoCard)
 
+		protected.GET("/users/me/study-activity", c.GetUserStudyActivity)
 	}
 
 }

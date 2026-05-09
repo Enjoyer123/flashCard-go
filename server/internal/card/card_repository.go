@@ -186,3 +186,33 @@ func (r *repository) CreateReviewLog(ctx context.Context, review *CardReview) er
 	)
 	return err
 }
+
+func (r *repository) GetUserStudyActivity(ctx context.Context, userID string) ([]StudyActivity, error) {
+	query := `
+		SELECT TO_CHAR(reviewed_at, 'YYYY-MM-DD') as date, COUNT(*) as review_count
+		FROM card_reviews
+		WHERE user_id = $1 AND reviewed_at >= CURRENT_DATE - INTERVAL '1 year'
+		GROUP BY TO_CHAR(reviewed_at, 'YYYY-MM-DD')
+		ORDER BY date ASC
+	`
+	rows, err := r.db.QueryContext(ctx, query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var activities []StudyActivity
+	for rows.Next() {
+		var a StudyActivity
+		if err := rows.Scan(&a.Date, &a.ReviewCount); err != nil {
+			return nil, err
+		}
+		activities = append(activities, a)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return activities, nil
+}

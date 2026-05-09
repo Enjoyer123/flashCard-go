@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createCardFn, getDueCardsFn, reviewCardFn, autoCardFn, updateCardFn } from '../../api/cardApi';
+import { createCardFn, getDueCardsFn, reviewCardFn, autoCardFn, updateCardFn, getUserStudyActivityFn } from '../../api/cardApi';
 import type { CreateCardReq, AutoCardReq, UpdateCardReq } from '../../api/cardApi';
 import type { Card, ReviewCardReq } from '../../types/card';
+import type { StudyActivity } from '../../api/cardApi';
 import { AxiosError } from 'axios';
 
 export const useCreateCard = () => {
@@ -45,5 +46,12 @@ export const useUpdateCard = () => {
       queryClient.invalidateQueries({ queryKey: ['decks', variables.deckId] });
       queryClient.invalidateQueries({ queryKey: ['decks', variables.deckId, 'due-cards'] });
     },
+  });
+};
+
+export const useStudyActivity = () => {
+  return useQuery<StudyActivity[], AxiosError>({
+    queryKey: ['study-activity'],
+    queryFn: () => getUserStudyActivityFn(),
   });
 };

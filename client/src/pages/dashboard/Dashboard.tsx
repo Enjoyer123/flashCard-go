@@ -3,6 +3,7 @@ import { useDecks, useCreateDeck } from '../../hooks/queries/useDecks';
 
 import DeckCard from '../../components/DeckCard';
 import CreateDeckModal from './components/CreateDeckModal';
+import StudyHeatmap from './components/StudyHeatmap';
 
 export default function Dashboard() {
   const { data: decks, isLoading, isError, error } = useDecks();
@@ -32,6 +33,8 @@ export default function Dashboard() {
           + Create Deck
         </button>
       </div>
+
+      <StudyHeatmap />
 
       {isLoading && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-pulse">

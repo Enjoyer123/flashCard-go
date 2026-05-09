@@ -16,6 +16,11 @@ export interface UpdateCardReq {
   back: string;
 }
 
+export interface StudyActivity {
+  date: string;
+  review_count: number;
+}
+
 export const createCardFn = async (deckId: string, data: CreateCardReq) => {
   const response = await apiClient.post(`/decks/${deckId}/cards`, data);
   return response.data;
@@ -38,5 +43,10 @@ export const autoCardFn = async (data: AutoCardReq): Promise<Card> => {
 
 export const updateCardFn = async (cardId: string, data: UpdateCardReq): Promise<Card> => {
   const response = await apiClient.patch<Card>(`/cards/${cardId}`, data);
+  return response.data;
+};
+
+export const getUserStudyActivityFn = async (): Promise<StudyActivity[]> => {
+  const response = await apiClient.get<StudyActivity[]>('/users/me/study-activity');
   return response.data;
 };

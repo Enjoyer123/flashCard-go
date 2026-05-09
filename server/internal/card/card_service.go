@@ -250,3 +250,14 @@ func (s *service) AutoCard(ctx context.Context, userID string, req *AutoCardReq)
 		Back:  back,
 	}, nil
 }
+
+func (s *service) GetUserStudyActivity(ctx context.Context, userID string) ([]StudyActivity, error) {
+	activities, err := s.Repository.GetUserStudyActivity(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	if activities == nil {
+		activities = []StudyActivity{}
+	}
+	return activities, nil
+}

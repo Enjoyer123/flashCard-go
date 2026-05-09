@@ -36,6 +36,11 @@ type CardReview struct {
 	ReviewedAt    time.Time `json:"reviewed_at"`
 }
 
+type StudyActivity struct {
+	Date       string `json:"date"` // YYYY-MM-DD
+	ReviewCount int   `json:"review_count"`
+}
+
 type JishoResponse struct {
 	Data []JishoData `json:"data"`
 }
@@ -81,6 +86,7 @@ type Service interface {
 	GetDueCards(ctx context.Context, deckID string, userID string) ([]*Card, error)
 	ReviewCard(ctx context.Context, cardID string, userID string, req *ReviewCardReq) (*Card, error)
 	AutoCard(ctx context.Context, userID string, req *AutoCardReq) (*Card, error)
+	GetUserStudyActivity(ctx context.Context, userID string) ([]StudyActivity, error)
 }
 
 type Repository interface {
@@ -91,4 +97,5 @@ type Repository interface {
 	GetDeckByID(ctx context.Context, deckID string) (string, error) // return userID
 	GetDueCards(ctx context.Context, deckID string) ([]*Card, error)
 	CreateReviewLog(ctx context.Context, review *CardReview) error
+	GetUserStudyActivity(ctx context.Context, userID string) ([]StudyActivity, error)
 }

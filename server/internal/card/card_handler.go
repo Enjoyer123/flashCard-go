@@ -176,3 +176,15 @@ func (h *Handler) AutoCard(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, card)
 }
+
+func (h *Handler) GetUserStudyActivity(c *gin.Context) {
+	userID := c.MustGet("userID").(string)
+
+	activities, err := h.Service.GetUserStudyActivity(c.Request.Context(), userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, activities)
+}
