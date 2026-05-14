@@ -4,7 +4,7 @@ A full-stack spaced-repetition flashcard application built with Go and React. Fl
 
 The application also supports a community-driven deck ecosystem: users can publish decks publicly, and others can browse, preview, and fork them into their own libraries. The backend follows a clean, layered architecture (handler → service → repository) with JWT-based authentication and ownership-scoped authorization on every resource.
 
-<!-- Insert: Hero screenshot showing the Dashboard with study heatmap and deck cards -->
+![Dashboard with study heatmap and deck cards](assets/heat.png)
 
 ---
 
@@ -50,7 +50,9 @@ Cards progress through four states during their lifecycle:
 
 The frontend's `useStudyStore` manages the session queue locally. When a card receives an "Again" rating (1), it is appended to the end of the queue so the user sees it again before the session ends. All other ratings advance to the next card.
 
-<!-- Insert: Screenshot of the study mode showing the flashcard flip interface with rating buttons -->
+![Flashcard front — question side with Show Answer button](assets/flashfront.png)
+
+![Flashcard back — answer revealed with Again / Hard / Good / Easy rating buttons](assets/flashback.png)
 
 ### Deck Management
 
@@ -66,6 +68,8 @@ Each user has a private library of decks. A deck has a title, description, and a
 
 Cards can be created manually (front/back text) or via the auto-generation feature. Existing cards can be edited inline through a modal interface.
 
+![Deck detail page showing all cards with front, back, and next review status](assets/allcard.png)
+
 ### Auto-Card Generation via Jisho API
 
 The "Auto Add" feature lets users type a Japanese word, and the server queries the [Jisho.org API](https://jisho.org) to fetch the kanji form, reading, part of speech, and English definitions. The server assembles these into a structured card:
@@ -75,21 +79,25 @@ The "Auto Add" feature lets users type a Japanese word, and the server queries t
 
 This eliminates the tedium of manually creating Japanese vocabulary cards and ensures consistent formatting across the deck.
 
+![Add New Card modal with Auto Translate filled in for 食べる](assets/add_vocap.png)
+
 ### Explore and Fork
 
 Any user can toggle a deck to public, making it visible on the Explore page. The Explore page provides paginated browsing with text search across titles and descriptions. Visitors can preview all cards in a public deck (in read-only mode) and fork the entire deck into their own library with a single click. Forking creates an independent copy — the new owner's cards start fresh with default FSRS parameters.
 
-<!-- Insert: Screenshot of the Explore page with public deck cards and search bar -->
+![Explore page with public deck cards and search bar](assets/fork.png)
 
 ### Study Activity Heatmap
 
 The dashboard features a GitHub-style contribution heatmap that visualizes review activity over time. Each cell represents a day, colored by the number of reviews completed. The data is pulled from the `card_reviews` table, aggregated by date on the server, and rendered on the client using `react-activity-calendar`.
 
-<!-- Insert: Screenshot of the study activity heatmap on the dashboard -->
+![Study activity heatmap on the dashboard](assets/heat.png)
 
 ### Authentication and Authorization
 
 User registration hashes passwords with bcrypt before storage. Login returns a JWT set as an HTTP-only cookie (with a fallback to `Authorization: Bearer` header). The `RequireAuth` middleware extracts and verifies the JWT on every protected route, injecting the `userID` into the Gin context. Every service-layer operation then checks that the requesting user owns the target resource (deck or card) before proceeding — there is no admin role, just strict per-user ownership scoping.
+
+![Login page with email and password fields](assets/login.png)
 
 ---
 

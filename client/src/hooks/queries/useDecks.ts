@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getDecksFn, createDeckFn, updateDeckFn, getDeckByIdFn, getDeckStatsFn, getPublicDecksFn, forkDeckFn } from '../../api/deckApi';
+import { getDecksFn, createDeckFn, updateDeckFn, getDeckByIdFn, getDeckStatsFn, getPublicDecksFn, forkDeckFn, deleteDeckFn } from '../../api/deckApi';
 import type { Deck, CreateDeckReq, UpdateDeckReq, DeckStats, PublicDeckRes } from '../../types/deck';
 import { AxiosError } from 'axios';
 
@@ -61,6 +61,16 @@ export const useForkDeck = () => {
   const queryClient = useQueryClient();
   return useMutation<Deck, AxiosError, string>({
     mutationFn: (deckId) => forkDeckFn(deckId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['decks'] });
+    },
+  });
+};
+
+export const useDeleteDeck = () => {
+  const queryClient = useQueryClient();
+  return useMutation<void, AxiosError, string>({
+    mutationFn: (deckId) => deleteDeckFn(deckId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['decks'] });
     },

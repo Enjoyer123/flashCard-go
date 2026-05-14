@@ -33,6 +33,10 @@ export const getPublicDecksFn = async (search: string = '', page: number = 1, li
   return response.data;
 };
 
+export const deleteDeckFn = async (deckId: string): Promise<void> => {
+  await apiClient.delete(`/decks/${deckId}`);
+};
+
 export const forkDeckFn = async (deckId: string): Promise<Deck> => {
   const response = await apiClient.post<Deck>(`/decks/${deckId}/fork`);
   return response.data;
